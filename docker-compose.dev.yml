@@ -13,7 +13,7 @@ services:
 
   backend-worker:
     build: ./backend
-    command: [ 'celery', '-A', 'src.tasks.celery_app', 'worker', '-l', 'info' ]
+    command: [ 'celery', '-A', 'src.worker', 'worker', '-l', 'info' ]
     container_name: backend-worker
     env_file: ".env.dev"
     volumes:
@@ -24,8 +24,6 @@ services:
   backend-db:
     image: postgres:latest
     container_name: backend-db
-    ports:
-      - "5433:5433"
     env_file: ".env.dev"
     volumes:
       - backend-db-volume:/var/lib/postgresql
@@ -38,9 +36,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: development
     container_name: frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
 
 volumes:
   backend-db-volume:

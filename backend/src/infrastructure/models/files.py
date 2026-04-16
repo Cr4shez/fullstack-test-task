@@ -1,0 +1,23 @@
+from typing import Optional
+
+from sqlalchemy import Boolean, Integer, JSON, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from src.infrastructure.models.base import Base, TimestampMixin
+from src.domain.schemas import FileUploadStatus
+
+
+class StoredFile(Base, TimestampMixin):
+    __tablename__ = "files"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    original_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    stored_name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    mime_type: Mapped[str] = mapped_column(String(255), nullable=False)
+    size: Mapped[int] = mapped_column(Integer, nullable=False)
+    processing_status: Mapped[str] = mapped_column(String(50), nullable=False, default=FileUploadStatus.UPLOADED)
+    scan_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    scan_details: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    requires_attention: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
