@@ -1,7 +1,7 @@
 from typing import Generic, TypeVar, Type, Optional, List, Union, Tuple
 
 from pydantic import BaseModel
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.models import Base
@@ -33,19 +33,27 @@ class BaseRepository(Generic[ModelType, SchemaType, CreateSchemaType, UpdateSche
         self,
         limit: int = 10,
         offset: int = 0,
-        **filters: dict[str, Union[str, int]]
-    ) -> Tuple[List[SchemaType], int]:
+        **filters: list[SchemaType]
+    ) -> List[SchemaType]:
         query = select(self._model).limit(limit).offset(offset)
         if filters:
             query = query.filter_by(**filters)
         result = await self._session.execute(query)
         db_objs = result.scalars().all()
-        return [self._schema.model_validate(obj) for obj in db_objs], len(db_objs)
+        return [self._schema.model_validate(obj) for obj in db_objs]
+
+    async def count(self, **filters: dict[str, Union[str, int]]) -> int:
+        query = select(func.count()).select_from(self._model)
+        if filters:
+            query = query.filter_by(**filters)
+        result = await self._session.execute(query)
+        count = result.scalar()
+        return count
 
     async def create(self, schema: CreateSchemaType) -> SchemaType:
         obj = self._model(**schema.model_dump())
         self._session.add(obj)
-        await self._session.commit()
+        await self._session.flush()
         await self._session.refresh(obj)
         return self._schema.model_validate(obj)
 
@@ -61,12 +69,12 @@ class BaseRepository(Generic[ModelType, SchemaType, CreateSchemaType, UpdateSche
         for field, value in update_data.items():
             setattr(db_obj, field, value)
 
-        await self._session.commit()
+        await self._session.flush()
         await self._session.refresh(db_obj)
         return self._schema.model_validate(db_obj)
 
     async def delete(self, id: str) -> bool:
         query = delete(self._model).where(self._model.id == id)
         result = await self._session.execute(query)
-        await self._session.commit()
+        await self._session.flush()
         return result.rowcount > 0

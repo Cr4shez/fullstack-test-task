@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Integer, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.infrastructure.models.base import Base, TimestampMixin
-from src.domain.schemas import FileUploadStatus
+from src.domain.schemas import FileProcessingStatus
 
 
 class StoredFile(Base, TimestampMixin):
@@ -16,7 +16,7 @@ class StoredFile(Base, TimestampMixin):
     stored_name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     mime_type: Mapped[str] = mapped_column(String(255), nullable=False)
     size: Mapped[int] = mapped_column(Integer, nullable=False)
-    processing_status: Mapped[str] = mapped_column(String(50), nullable=False, default=FileUploadStatus.UPLOADED)
+    processing_status: Mapped[str] = mapped_column(String(50), nullable=False, default=FileProcessingStatus.UPLOADED)
     scan_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     scan_details: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)

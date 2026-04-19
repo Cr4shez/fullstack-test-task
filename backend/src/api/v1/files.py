@@ -13,12 +13,13 @@ file_router = APIRouter()
 
 @file_router.get("/", response_model=PaginatedResponse[FileResponse])
 async def list_files_view(repo: FileRepoDep, params: PaginationParams=Depends()):
-    items, total = await repo.find_all(limit=params.limit, offset=params.offset)
+    items = await repo.find_all(limit=params.limit, offset=params.offset)
+    total = await repo.count()
     return PaginatedResponse[FileResponse](
         items=items,
         total=total,
         page=params.page,
-        size=params.limit,
+        limit=params.limit,
         has_next=(params.page * params.limit) < total
     )
 
@@ -35,7 +36,7 @@ async def scan_file(file_id: str, service: FileServiceDep):
     return await service.scan_for_threats(file_id)
 
 
-@file_router.get("/{file_id}", response_model=FileResponse)
+@file_router.get("/{file_id}", response_model=FileResponse, status_code=200)
 async def get_file_view(file_id: str, service: FileServiceDep):
     return await service.get_file(file_id)
 

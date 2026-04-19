@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.domain.exceptions import FileMissingError
 from src.domain.logic import determine_file_alert
 from src.domain.schemas import AlertCreateDTO
@@ -12,9 +14,11 @@ if TYPE_CHECKING:
 class AlertUseCases:
     def __init__(
         self,
+        session: AsyncSession,
         file_repo: FileRepository,
         alert_repo: AlertRepository,
     ):
+        self.session = session
         self.file_repo = file_repo
         self.repo = alert_repo
 
@@ -31,3 +35,4 @@ class AlertUseCases:
             level=alert.level,
             message=alert.message
         ))
+        await self.session.commit()

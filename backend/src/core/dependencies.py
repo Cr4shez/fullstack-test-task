@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.config import get_settings
 from src.core.database import SessionLocal
 from src.domain.use_cases import FileUseCases, AlertUseCases
 from src.infrastructure.repositories import FileRepository, AlertRepository
@@ -15,35 +16,37 @@ async def get_session():
         yield db
 
 
-async def get_task_scheduler():
+def get_task_scheduler():
     return CeleryTaskScheduler()
 
 
-async def get_storage():
-    return LocalStorage()
+def get_storage(settings=Depends(get_settings)):
+    return LocalStorage(settings)
 
 
-async def get_file_repository(session=Depends(get_session)):
+def get_file_repository(session=Depends(get_session)):
     return FileRepository(session)
 
 
-async def get_alert_repository(session=Depends(get_session)):
+def get_alert_repository(session=Depends(get_session)):
     return AlertRepository(session)
 
 
-async def get_file_service(
+def get_file_service(
+    session=Depends(get_session),
     repo=Depends(get_file_repository),
     tasker=Depends(get_task_scheduler),
     storage=Depends(get_storage)
 ):
-    return FileUseCases(repo=repo, tasker=tasker, storage=storage)
+    return FileUseCases(session=session, repo=repo, tasker=tasker, storage=storage)
 
 
-async def get_alert_service(
+def get_alert_service(
+    session=Depends(get_session),
     file_repo=Depends(get_file_repository),
     alert_repo=Depends(get_alert_repository)
 ):
-    return AlertUseCases(file_repo=file_repo, alert_repo=alert_repo)
+    return AlertUseCases(session=session, file_repo=file_repo, alert_repo=alert_repo)
 
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]

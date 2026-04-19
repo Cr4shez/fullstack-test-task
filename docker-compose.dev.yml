@@ -27,6 +27,8 @@ services:
     env_file: ".env.dev"
     volumes:
       - backend-db-volume:/var/lib/postgresql
+    ports:
+      - "5433:5432"
 
   backend-redis:
     image: redis:latest

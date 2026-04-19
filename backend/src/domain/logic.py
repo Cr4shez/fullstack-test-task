@@ -1,7 +1,7 @@
-from typing import NamedTuple, TYPE_CHECKING
+from typing import NamedTuple
 
-if TYPE_CHECKING:
-    from src.domain.schemas import FileDTO
+from src.domain.schemas.enums import AlertLevel, FileProcessingStatus
+from src.domain.schemas import FileDTO
 
 
 class AlertInfo(NamedTuple):
@@ -10,20 +10,22 @@ class AlertInfo(NamedTuple):
 
 
 def determine_file_alert(file: FileDTO) -> AlertInfo:
-    if file.processing_status == "failed":
-        return AlertInfo(level="critical", message="File processing failed")
+    if file.processing_status == FileProcessingStatus.FAILED:
+        return AlertInfo(level=AlertLevel.CRITICAL, message="File processing failed")
 
     if file.requires_attention:
         return AlertInfo(
-            level="warning",
+            level=AlertLevel.WARNING,
             message=f"File requires attention: {file.scan_details}"
         )
 
-    return AlertInfo(level="info", message="File processed successfully")
+    return AlertInfo(level=AlertLevel.INFO, message="File processed successfully")
 
 
 def analyze_file_security(file: FileDTO) -> list[str]:
     reasons = []
+    if not file.extension:
+        reasons.append(f"couldn't parse extension")
     if file.extension in {".exe", ".bat", ".cmd", ".sh", ".js"}:
         reasons.append(f"suspicious extension {file.extension}")
     if file.size > 10 * 1024 * 1024:

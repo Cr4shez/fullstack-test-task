@@ -17,5 +17,5 @@ class PaginatedResponse(BaseModel, Generic[T]):
     items: List[Any]
     total: int
     page: int
-    size: int
+    limit: int
     has_next: bool

@@ -1,13 +1,13 @@
 import asyncio
 
-from src.core.config import settings
+from src.core.config import Settings
 from src.infrastructure.storage.base import BaseStorage, StoredFileInfo
 
 
 class LocalStorage(BaseStorage):
-    base_dir = settings.storage_dir
 
-    def __init__(self):
+    def __init__(self, settings: Settings):
+        self.base_dir = settings.storage_dir
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
     async def write_file(self, name: str, content: bytes) -> StoredFileInfo:
