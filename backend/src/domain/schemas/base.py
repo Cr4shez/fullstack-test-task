@@ -14,7 +14,7 @@ class PaginationParams(BaseModel):
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    items: List[Any]
+    items: List[T]
     total: int
     page: int
     limit: int

@@ -13,11 +13,12 @@ async def list_alerts_view(
     repo: AlertRepoDep,
     params: PaginationParams = Depends()
 ):
-    items, total = await repo.find_all(limit=params.limit, offset=params.offset)
+    items = await repo.find_all(limit=params.limit, offset=params.offset)
+    total = await repo.count()
     return PaginatedResponse[AlertResponse](
         items=items,
         total=total,
         page=params.page,
-        size=params.limit,
+        limit=params.limit,
         has_next=(params.page * params.limit) < total
     )

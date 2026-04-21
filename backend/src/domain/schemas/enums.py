@@ -7,10 +7,12 @@ class FileProcessingStatus(str, enum.Enum):
     PROCESSED = "processed"
     FAILED = "failed"
 
+
 class AlertLevel(str, enum.Enum):
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
+
 
 class FileScanStatus(str, enum.Enum):
     PENDING = "pending"

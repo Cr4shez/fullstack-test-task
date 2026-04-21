@@ -1,33 +1,29 @@
 from pydantic import BaseModel, ConfigDict
 
 from src.domain.schemas.mixins import partial, CreatedSchemaMixin
+from src.domain.schemas.enums import AlertLevel
 
 
-class AlertCreateRequest(BaseModel):
-    pass
-
-
-class AlertResponse(BaseModel):
-    pass
-
-
-class AlertDTOBase(CreatedSchemaMixin, BaseModel):
+class AlertBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    file_id: str
+    level: AlertLevel
+    message: str
 
+
+class AlertCreateRequest(AlertBase):
+    pass
+
+
+class AlertResponse(CreatedSchemaMixin, AlertBase):
     id: int
-    file_id: str
-    level: str
-    message: str
 
 
-class AlertCreateDTO(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    file_id: str
-    level: str
-    message: str
+class AlertCreateDTO(AlertBase):
+    pass
 
 
 @partial
-class AlertDTO(AlertDTOBase):
-    pass
+class AlertDTO(CreatedSchemaMixin, AlertBase):
+    id: int
+

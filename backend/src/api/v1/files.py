@@ -31,7 +31,7 @@ async def create_file_view(data: Annotated[FileCreateRequest, Form()], service: 
     )
 
 
-@file_router.post("/{file_id}/scan")
+@file_router.post("/{file_id}/scan", response_model=FileResponse, status_code=200)
 async def scan_file(file_id: str, service: FileServiceDep):
     return await service.scan_for_threats(file_id)
 
